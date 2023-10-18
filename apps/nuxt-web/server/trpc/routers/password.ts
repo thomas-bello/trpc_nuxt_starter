@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { publicProcedure, router } from '../trpc'
-import { hashPassword } from '~/server/auth'
+import { hashPassword } from '~~/server/auth'
 
 export const appRouter = router({
   hash: publicProcedure

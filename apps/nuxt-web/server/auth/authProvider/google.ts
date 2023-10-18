@@ -5,7 +5,7 @@ import type { TokenSet } from 'next-auth'
 
 import type { Account } from '@prisma/client'
 import { RefreshTokenFunc } from '../types'
-import { getPrisma } from '~/server/database'
+import { getPrisma } from '~~/server/database'
 import { env } from '~/env'
 
 // https://developers.google.com/identity/protocols/oauth2?hl=zh-cn

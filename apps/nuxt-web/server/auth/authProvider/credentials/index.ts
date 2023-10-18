@@ -3,7 +3,7 @@ import Provider from 'next-auth/providers/credentials'
 import type { Session } from 'next-auth'
 
 import { checkPassword } from './password'
-import { getPrisma } from '~/server/database'
+import { getPrisma } from '~~/server/database'
 
 type AuthorizeReturn =
   | Session['user']

@@ -1,4 +1,4 @@
-import { env } from './src/env'
+import { env } from './env'
 
 const baseBuildTranspileList = ['bcryptjs', 'trpc-nuxt', 'qcloud-cos-sts', '@juggle/resize-observer']
 
@@ -11,7 +11,7 @@ const isDev = env.NODE_ENV === 'development'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  srcDir: 'src/',
+  // srcDir: 'src/',
   // dir: {
   //   pages: 'src/pages',
   // },
@@ -31,9 +31,9 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    optimizeDeps: {
-      include: isDev ? ['naive-ui', 'vueuc', 'date-fns-tz/esm/formatInTimeZone'] : [],
-    },
+    // optimizeDeps: {
+    //   include: isDev ? ['naive-ui', 'vueuc', 'date-fns-tz/esm/formatInTimeZone'] : [],
+    // },
     define: {
       'import.meta.vitest': 'undefined',
     },

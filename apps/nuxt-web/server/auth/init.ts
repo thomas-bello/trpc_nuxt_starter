@@ -15,30 +15,34 @@ import {
   // UserRole, PermissionsType,
   ErrorType,
 } from './types'
-import { getPrisma } from '~/server/database'
+import { getPrisma } from '~~/server/database'
 
 import { env } from '~/env'
 import { getDayjs } from '~/utils/dayjs'
 
 const updateLastAccessed = async (userId: string) => {
-  const day = getDayjs().format('YYYY/MM/DD')
+  try {
+    const day = getDayjs().format('YYYY/MM/DD')
 
-  await getPrisma().loginLog.upsert({
-    where: {
-      day_userId: {
+    await getPrisma().loginLog.upsert({
+      where: {
+        day_userId: {
+          userId,
+          day,
+        },
+      },
+      update: {
+        endAt: new Date(),
+      },
+      create: {
         userId,
         day,
+        endAt: new Date(),
       },
-    },
-    update: {
-      endAt: new Date(),
-    },
-    create: {
-      userId,
-      day,
-      endAt: new Date(),
-    },
-  })
+    })
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 /**

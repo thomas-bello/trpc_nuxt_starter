@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 
-import { getEnhancedPrisma, getPrisma } from '~/server/database'
+import { getEnhancedPrisma, getPrisma } from '~~/server/database'
 
 import { getServerSession } from '#auth'
 
-import type { Session } from '~/server/auth'
+import type { Session } from '~~/server/auth'
 
 declare module 'h3' {
   interface H3EventContext {
