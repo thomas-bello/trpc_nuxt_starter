@@ -1,0 +1,16 @@
+public
+dist
+dist-ssr
+build
+node_modules
+.husky
+.nuxt
+
+package-lock.json
+pnpm-lock.yaml
+
+**/*.svg
+**/*.sh
+
+
+packages/ts-config/base.json

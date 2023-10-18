@@ -1,0 +1,88 @@
+import "shop"
+import "i18n"
+import "config"
+// https://github.com/nextauthjs/next-auth/blob/main/packages/adapter-prisma/prisma/custom.prisma
+
+
+model User {
+  id String @id @default(cuid())
+  name String?
+  email String? @unique
+  emailVerified DateTime?
+  image String? // 头像
+  phone String?
+  role String?
+  accounts Account[]
+  sessions Session[]
+
+  // next auth 自定义
+  password String?
+
+  // 邀请相关
+  inviterId String? // 邀请人
+  inviter User? @relation("InviteHistory", fields: [inviterId], references: [id])
+  invitee User[] @relation("InviteHistory")
+
+  // 基础信息相关
+
+  // 其他关联
+  shops Shop[]
+  producs Produce[]
+
+  produceSpecifications ProduceSpecification[]
+  freeExpressFeeRules FreeExpressFeeRule[]
+  expressFeeRules ExpressFeeRule[]
+
+  shopMembers ShopMember[]
+
+  i18nValues I18nValue[]
+  configValues ConfigValue[]
+
+  loginLogs LoginLog[]
+}
+
+model Account {
+  userId String
+  type String
+  provider String
+  providerAccountId String
+  refresh_token String?
+  access_token String?
+  expires_at Int?
+  token_type String?
+  scope String?
+  id_token String?
+  session_state String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String @unique
+  userId String
+  expires DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token String @unique
+  expires DateTime
+
+  @@id([identifier, token])
+}
+
+
+// 自定义内容
+
+model LoginLog {
+  day String
+  userId String
+  startAt DateTime @default(now())
+  endAt DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([day, userId])
+}

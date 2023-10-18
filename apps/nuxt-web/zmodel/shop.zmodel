@@ -1,0 +1,290 @@
+import "base"
+import "currency"
+import "user"
+
+// 店铺
+
+enum ShowStatus {
+  OPEND // 开店中
+  DRAFT // 草稿
+  REVIEW // 审核中
+}
+
+model Shop extends Base {
+  name String
+  logo String? // logo
+
+  status ShowStatus @default(DRAFT)
+
+  producs Produce[]
+  shopMember ShopMember[]
+}
+
+enum ShopMemberRole {
+  OWNER // 拥有者
+  ADMIN // 管理员
+  SALER // 销售
+}
+
+model ShopMember {
+
+  role ShopMemberRole
+
+  shopId String
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([shopId, userId])
+}
+
+// 价格 规格
+model ProduceSpecification extends Base {
+  // 产品规格
+  name String // 规格名
+  values ProduceSpecificationValue[] // 产品规格值
+
+  producId String
+  produc Produce @relation(fields: [producId], references: [id], onDelete: Cascade)
+}
+
+model ProduceSpecificationValue {
+  // 产品规格值
+  id String @id @default(cuid())
+  value String // 规格值
+  iamge String? // 规格图片
+
+  produceSpecificationId String
+  produceSpecification ProduceSpecification @relation(fields: [produceSpecificationId], references: [id], onDelete: Cascade)
+
+  producePrices ProducePrice[]
+  produceSpecificationValuePrice ProduceSpecificationValuePrice[]
+
+  deletedAt DateTime?
+  deleted Boolean @default(false)
+}
+
+model ProducePrice {
+  id String @id @default(cuid())
+
+  goods_no String? // 货号
+  currency CurrencyType @default(CNY)
+
+  price Decimal @default(0) // 售价
+  cost Decimal @default(0) // 成本价
+
+  weight Int @default(0) // 重量 单位为g
+
+  stock Int @default(0) // 库存
+  reduceStock Int // 减库 减库方式：1 付款减库存 2 拍下减库存
+
+  saled Int @default(0) // 已卖出
+  saledAmount Decimal @default(0) // 销售额
+
+  deletedAt DateTime?
+  deleted Boolean @default(false)
+
+  producId String
+  produc Produce @relation(fields: [producId], references: [id], onDelete: Cascade)
+
+  produceSpecificationValues ProduceSpecificationValue[]
+  produceSpecificationValuePrice ProduceSpecificationValuePrice[]
+}
+
+model ProduceSpecificationValuePrice {
+  producePriceId String
+  producePrice ProducePrice @relation(fields: [producePriceId], references: [id])
+
+  produceSpecificationValueId String
+  produceSpecificationValue ProduceSpecificationValue @relation(fields: [produceSpecificationValueId], references: [id])
+
+  @@id([producePriceId, produceSpecificationValueId])
+}
+
+// 商品
+enum ProduceStatus {
+  IN_STOCK // 在售
+  DRAFT // 草稿
+  REVIEW // 审核中
+}
+
+enum ProduceType {
+  CARD // 发卡商品，卖家输入贩卖信息，买家购买后系统自动发放（邮件）
+  COMBO // 套餐/代金券，需要核销商品
+  PHYSICAL // 实物商品，需要发货，物流
+}
+
+enum LimitBuyType {
+  DAY // 每天
+  WEEK // 每周
+  MONTH // 每月
+  ONCE // 只能买一次
+}
+
+model Produce extends Base {
+  // 描述信息
+  name String
+
+
+  status ProduceStatus @default(DRAFT)
+
+  linePrice Decimal // 划线价 当商品无任何优惠时，显示划线价 (原价)
+
+  tags String? // 标签
+
+  visits Int @default(0) // 访问量
+  saled Int @default(0) // 已卖出
+  saledAmount Decimal @default(0) // 销售额
+
+  isLimitBuy Boolean @default(false) // 是否限购
+  limitBuyType LimitBuyType? // 限购模式
+  limitBuyValue Int? // 起购数量
+
+  minBuyValue Int? // 起购数量
+
+  shopId String
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  produceSpecification ProduceSpecification[] // 规格
+  producePrice ProducePrice[]
+
+  type ProduceType @default(PHYSICAL) // 商品类型
+  cardProduce CardProduce?
+  comboProduce ComboProduce?
+  physicalProduce PhysicalProduce?
+}
+
+// 虚拟商品
+/**
+ * ProduceType: CARD
+ * 点卡，账号
+ *
+ * 卖家输入贩卖信息，买家购买后系统自动发放（邮件）
+ * 通过邮件链接回系统查看贩卖信息，回到系统则定义为卖家确认收货
+ */
+
+enum CardProduceAccountStatus {
+  IN_STOCK // 在售
+  SOLD // 已售
+}
+
+model CardProduceAccount {
+  id String @id @default(cuid())
+
+  value String // 发卡的内容
+
+  status CardProduceAccountStatus @default(IN_STOCK)
+
+  cardProduceId String
+  cardProduce CardProduce @relation(fields: [cardProduceId], references: [id], onDelete: Cascade)
+}
+
+model CardProduce {
+  id String @id @default(cuid())
+
+  produceId String @unique
+  produce Produce @relation(fields: [produceId], references: [id], onDelete: Cascade)
+
+  cardProduceAccounts CardProduceAccount[]
+}
+
+
+/**
+ * ProduceType: COMBO
+ *
+ * 套餐，代价券
+ * 卖家需要核销商品
+ */
+
+model ComboProduce {
+  id String @id @default(cuid())
+
+  produceId String @unique
+  produce Produce @relation(fields: [produceId], references: [id], onDelete: Cascade)
+}
+
+// 实体商品
+/**
+ * ProduceType: PHYSICAL
+ * 需要发货，物流
+ *
+ * 买家需要确认收货
+ */
+
+
+enum FreeExpressFeeRuleType {
+  ORDER_AMOUNT_LIMIT // 订单满件
+  ORDER_FEE_LIMIT // 订单满额
+
+  PRODUCE_AMOUNT_LIMIT // 商品满件
+  PRODUCE_FEE_LIMIT // 商品满额
+}
+
+// 包邮规则
+model FreeExpressFeeRule extends Base {
+  name String
+
+  type FreeExpressFeeRuleType @default(ORDER_FEE_LIMIT)
+  freeExpressFeeRuleCitys FreeExpressFeeRuleCity[]
+
+  physicalProduces PhysicalProduce[]
+
+  isDef Boolean
+}
+
+model FreeExpressFeeRuleCity {
+  id String @id @default(cuid())
+  citys String
+  limit Int // 满多少
+
+  freeExpressFeeRuleId String
+  freeExpressFeeRule FreeExpressFeeRule @relation(fields: [freeExpressFeeRuleId], references: [id], onDelete: Cascade)
+}
+
+enum ExpressFeeRuleTyle {
+  AMOUNT // 按件计费
+  WEIGHT // 按重计费
+}
+
+model ExpressFeeRule extends Base {
+  name String
+
+  type ExpressFeeRuleTyle @default(AMOUNT)
+
+  isDef Boolean
+
+  expressFeeRuleCitys ExpressFeeRuleCity[]
+  physicalProduces PhysicalProduce[]
+}
+
+model ExpressFeeRuleCity {
+  id String @id @default(cuid())
+  citys String
+
+  firstLimit Int // 多少之内
+  firstFee Decimal // 多少之内费用
+
+  step Int // 之后每多少
+  stepFee Decimal // 之后每多少费用
+
+  expressFeeRuleId String
+  expressFeeRule ExpressFeeRule @relation(fields: [expressFeeRuleId], references: [id], onDelete: Cascade)
+}
+
+
+model PhysicalProduce {
+  id String @id @default(cuid())
+
+  produceId String @unique
+  produce Produce @relation(fields: [produceId], references: [id], onDelete: Cascade)
+
+  expressFee Decimal // 快递费用
+  isFreeExpressFee Boolean // 是否包邮
+
+  freeExpressFeeRuleId String // 包邮规则
+  freeExpressFeeRule FreeExpressFeeRule @relation(fields: [freeExpressFeeRuleId], references: [id], onDelete: Cascade) // 包邮规则
+
+  expressFeeRuleId String // 运费计算规则
+  expressFeeRule ExpressFeeRule @relation(fields: [expressFeeRuleId], references: [id], onDelete: Cascade)
+}

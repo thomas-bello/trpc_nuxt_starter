@@ -1,0 +1,82 @@
+# starts a postgres instance
+# version: "3.6"
+# services:
+#   db:
+#     image: postgres:13
+#     ports:
+#       - "5432:5432" # expose pg on port 5465 to not collide with pg from elsewhere
+#     restart: always
+#     volumes:
+#       - db_data:/var/lib/postgresql-trpc-vue-vite-ssr/data
+#     environment:
+#       POSTGRES_HOST_AUTH_METHOD: trust
+#       POSTGRES_DB: trpc-vue-vite-ssr
+#       POSTGRES_USER: default
+#       POSTGRES_PASSWORD: default
+#   app:
+#     build: .
+#     ports:
+#       - 3000:3000
+#     links:
+#       - db
+#     depends_on:
+#       - db
+#     # environment:
+#     #   DATABASE_URL: postgres://default:default@db:5432/trpc-vue-vite-ssr
+#     #   POSTGRES_URL: postgres://default:default@db:5432/trpc-vue-vite-ssr
+#     #   POSTGRES_PRISMA_URL: postgres://default:default@db:5432/trpc-vue-vite-ssr?pgbouncer=true&connect_timeout=15
+#     #   POSTGRES_URL_NON_POOLING: postgres://default:default@db:5432/trpc-vue-vite-ssr
+#     #   POSTGRES_HOST: db
+# volumes:
+#   db_data:
+# starts a mysql instance
+version: '3.6'
+
+services:
+  # db:
+  #   image: mysql:5.7
+  #   command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+  #   ports:
+  #     - 3306:3306
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #   environment:
+  #     - MYSQL_PASSWORD=default
+  #     - MYSQL_ROOT_PASSWORD=default
+  #     - MYSQL_DATABASE=trpc-vue-vite-ssr
+  #     - "TZ=Asia/Shanghai"
+
+  db:
+    image: mysql:5.7
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    ports:
+      - 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      - MYSQL_PASSWORD=default
+      - MYSQL_ROOT_PASSWORD=default
+      - MYSQL_DATABASE=trpc-vue-vite-ssr-dev
+      - 'TZ=Asia/Shanghai'
+  redis:
+    image: redis:7
+    ports:
+      - 6379:6379
+    environment:
+      - PASSWORD=123456
+    volumes:
+      - ./redis:/data
+  app:
+    build:
+      dockerfile: ./apps/nuxt-web/Dockerfile
+    ports:
+      - 3000:3000
+    links:
+      - db
+      - redis
+    depends_on:
+      - db
+      - redis
+volumes:
+  db_data:
+    driver: local

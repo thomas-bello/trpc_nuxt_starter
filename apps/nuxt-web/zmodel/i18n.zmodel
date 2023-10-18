@@ -1,0 +1,8 @@
+import "base"
+
+model I18nValue extends Base {
+  key String
+  value String
+  lang String
+
+}

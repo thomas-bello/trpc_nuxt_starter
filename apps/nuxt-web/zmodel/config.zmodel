@@ -1,0 +1,11 @@
+import "base"
+
+enum ConfigValueKey {
+  TENCENT_COS_SECRET // 腾讯云cod 密钥相关
+  TENCENT_COS_UPLOAD // 腾讯云cod 上传相关配置
+}
+
+model ConfigValue extends Base {
+  key ConfigValueKey
+  value Json
+}

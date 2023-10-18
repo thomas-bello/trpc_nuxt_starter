@@ -1,0 +1,14 @@
+{
+  "testInSource": {
+    "prefix": "inSourceTest",
+    "body": [
+      "if (import.meta.vitest) {",
+      "\tconst { it, expect } = import.meta.vitest",
+      "\tit('${0}', () => {",
+      "\t\texpect().toBe()",
+      "\t})",
+      "}"
+    ],
+    "description": "inSourceTest吊吊的单测"
+  }
+}
