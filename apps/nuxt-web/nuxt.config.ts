@@ -1,6 +1,13 @@
-import { env } from './env'
+import { env } from './src/env'
 
-const baseBuildTranspileList = ['bcryptjs', 'trpc-nuxt', 'qcloud-cos-sts', '@juggle/resize-observer']
+const baseBuildTranspileList = [
+  'bcryptjs',
+  'trpc-nuxt',
+  'qcloud-cos-sts',
+  '@juggle/resize-observer',
+  'next-auth/providers',
+  '@vueuse/nuxt',
+]
 
 const devBuildTranspileList = [...baseBuildTranspileList]
 
@@ -11,10 +18,8 @@ const isDev = env.NODE_ENV === 'development'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  // srcDir: 'src/',
-  // dir: {
-  //   pages: 'src/pages',
-  // },
+  srcDir: 'src/',
+
   devtools: { enabled: true },
   typescript: {
     strict: false,
@@ -24,6 +29,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     'nuxt-lodash', // https://nuxt.com/modules/lodash
     'nuxt-icon', // https://github.com/nuxt-modules/icon
+    '@vueuse/nuxt', // https://nuxt.com/modules/vueuse
   ],
 
   build: {
@@ -31,9 +37,9 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    // optimizeDeps: {
-    //   include: isDev ? ['naive-ui', 'vueuc', 'date-fns-tz/esm/formatInTimeZone'] : [],
-    // },
+    optimizeDeps: {
+      include: isDev ? ['naive-ui', 'vueuc'] : [],
+    },
     define: {
       'import.meta.vitest': 'undefined',
     },

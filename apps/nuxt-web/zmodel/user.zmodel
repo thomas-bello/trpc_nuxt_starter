@@ -17,6 +17,12 @@ model User {
 
   // next auth 自定义
   password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  deletedAt DateTime?
+  deleted Boolean @default(false)
+
+  block Boolean @default(false) // 禁号
 
   // 邀请相关
   inviterId String? // 邀请人
@@ -39,6 +45,9 @@ model User {
   configValues ConfigValue[]
 
   loginLogs LoginLog[]
+  balanceLogs BalanceLog[]
+
+  creatorBalanceLogs BalanceLog[] @relation("BalanceLogCreator")
 }
 
 model Account {
@@ -85,4 +94,27 @@ model LoginLog {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([day, userId])
+}
+
+
+model BalanceLog {
+  id String @id @default(cuid())
+
+  balance Decimal @default(0) // 余额
+  change Decimal @default(0) // 变动
+  changeBefore Decimal @default(0) // 变动前余额
+
+  remark String // 备注
+  log Json? // 其他log 的信息
+
+  createdAt DateTime @default(now())
+  creatorId String?
+  creator User? @relation('BalanceLogCreator', fields: [creatorId], references: [id])
+
+  preBalanceLogId String? // 前一条历史的id
+  preBalanceLog BalanceLog? @relation('BalanceLogHistory', fields: [preBalanceLogId], references: [id])
+  balanceLogs BalanceLog[] @relation("BalanceLogHistory")
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

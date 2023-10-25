@@ -103,6 +103,11 @@ model User {
     accounts Account[]
     sessions Session[]
     password String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt()
+    deletedAt DateTime?
+    deleted Boolean @default(false)
+    block Boolean @default(false)
     inviterId String?
     inviter User? @relation("InviteHistory", fields: [inviterId], references: [id])
     invitee User[] @relation("InviteHistory")
@@ -115,6 +120,8 @@ model User {
     i18nValues I18nValue[]
     configValues ConfigValue[]
     loginLogs LoginLog[]
+    balanceLogs BalanceLog[]
+    creatorBalanceLogs BalanceLog[] @relation("BalanceLogCreator")
 }
 
 model Account {
@@ -157,6 +164,23 @@ model LoginLog {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@id([day, userId])
+}
+
+model BalanceLog {
+    id String @id() @default(cuid())
+    balance Decimal @default(0)
+    change Decimal @default(0)
+    changeBefore Decimal @default(0)
+    remark String
+    log Json?
+    createdAt DateTime @default(now())
+    creatorId String?
+    creator User? @relation("BalanceLogCreator", fields: [creatorId], references: [id])
+    preBalanceLogId String?
+    preBalanceLog BalanceLog? @relation("BalanceLogHistory", fields: [preBalanceLogId], references: [id])
+    balanceLogs BalanceLog[] @relation("BalanceLogHistory")
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// @@allow('all', auth() == creator)
